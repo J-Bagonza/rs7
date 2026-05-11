@@ -1,238 +1,683 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>please wait as the page loads</title>
+  <title>Shadow Realm — Browser Game</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet"/>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700&display=swap');
+    :root {
+      --neon: #00ffe7;
+      --red: #ff2e4c;
+      --gold: #ffd700;
+      --bg: #050810;
+      --panel: #0b1120;
+      --border: #1a2a44;
+    }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       min-height: 100vh;
-      display: flex;
+      background: var(--bg);
+      font-family: 'Rajdhani', sans-serif;
+      color: #cdd6f4;
+      overflow-x: hidden;
+    }
+
+    /* ── SCANLINE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* ── STARFIELD ── */
+    .stars {
+      position: fixed; inset: 0; z-index: 0;
+      background:
+        radial-gradient(1px 1px at 10% 15%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, #aef 0%, transparent 100%),
+        radial-gradient(1px 1px at 50% 10%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 60%, #aef 0%, transparent 100%),
+        radial-gradient(1px 1px at 85% 25%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 75%, #aef 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 80%, #fff 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 90%, #aef 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 50%, #fff 0%, transparent 100%),
+        radial-gradient(2px 2px at 45% 30%, #fff 0%, transparent 100%),
+        radial-gradient(2px 2px at 80% 45%, #aef 0%, transparent 100%);
+    }
+
+    /* ── HEADER ── */
+    header {
+      position: relative; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 32px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5,8,16,0.9);
+      backdrop-filter: blur(10px);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: var(--neon);
+      text-shadow: 0 0 12px var(--neon);
+      letter-spacing: 0.1em;
+    }
+
+    .logo span { color: var(--red); text-shadow: 0 0 12px var(--red); }
+
+    nav { display: flex; gap: 20px; flex-wrap: wrap; }
+    nav a {
+      color: #6b7a9a;
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--neon); }
+
+    .nav-right { display: flex; gap: 12px; align-items: center; }
+
+    .btn-small {
+      padding: 6px 16px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: #8899bb;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 3px;
+      transition: all 0.2s;
+    }
+    .btn-small:hover { border-color: var(--neon); color: var(--neon); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 5;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      gap: 40px;
+      max-width: 1100px;
+      margin: 60px auto 0;
+      padding: 0 32px;
       align-items: center;
-      justify-content: center;
-      background: #0d0d0d;
-      font-family: 'Nunito', sans-serif;
+    }
+
+    .hero-text h1 {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900;
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      line-height: 1.1;
+      color: #fff;
+      text-shadow: 0 0 40px rgba(0,255,231,0.3);
+      margin-bottom: 8px;
+    }
+
+    .hero-text h1 em {
+      font-style: normal;
+      color: var(--neon);
+      text-shadow: 0 0 20px var(--neon);
+    }
+
+    .subtitle {
+      font-size: 1rem;
+      color: #6b7a9a;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .desc {
+      font-size: 1.05rem;
+      color: #8899bb;
+      line-height: 1.7;
+      max-width: 480px;
+      margin-bottom: 32px;
+    }
+
+    /* ── TAGS ── */
+    .tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 36px; }
+    .tag {
+      padding: 4px 12px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #6b7a9a;
+    }
+    .tag.hot { border-color: var(--red); color: var(--red); }
+    .tag.new { border-color: var(--neon); color: var(--neon); }
+
+    /* ── STATS ROW ── */
+    .stats {
+      display: flex; gap: 28px; flex-wrap: wrap;
+      margin-bottom: 40px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .stat-item { display: flex; flex-direction: column; gap: 2px; }
+    .stat-value {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .stat-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #4a5a78;
+    }
+
+    /* ── THE PLAY BUTTON ── */
+    .play-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 48px;
+      background: linear-gradient(135deg, #00ffe7 0%, #0088ff 100%);
+      border: none;
+      border-radius: 4px;
+      font-family: 'Orbitron', monospace;
+      font-weight: 700;
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #050810;
+      cursor: pointer;
+      position: relative;
       overflow: hidden;
-      cursor: default;
+      transition: transform 0.15s;
+
+      /* Animated glow pulse */
+      animation: btn-pulse 2s ease-in-out infinite;
     }
 
-    .bg {
-      position: fixed; inset: 0;
-      background: radial-gradient(ellipse at 20% 50%, #1a0a2e 0%, #0d0d0d 60%);
-      z-index: 0;
+    @keyframes btn-pulse {
+      0%, 100% {
+        box-shadow:
+          0 0 20px rgba(0,255,231,0.5),
+          0 0 50px rgba(0,255,231,0.25),
+          0 0 90px rgba(0,136,255,0.15);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow:
+          0 0 35px rgba(0,255,231,0.85),
+          0 0 80px rgba(0,255,231,0.45),
+          0 0 130px rgba(0,136,255,0.3);
+        transform: scale(1.03);
+      }
     }
 
-    /* Fake loading spinner shown first */
-    #loader {
-      position: fixed; inset: 0;
-      background: #0d0d0d;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
+    /* Shimmer sweep */
+    .play-btn::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%; height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.35),
+        transparent
+      );
+      animation: shimmer 2.4s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0%   { left: -80%; }
+      60%, 100% { left: 140%; }
+    }
+
+    /* Ring ripple */
+    .play-btn::after {
+      content: '';
+      position: absolute; inset: -3px;
+      border-radius: 6px;
+      border: 2px solid rgba(0,255,231,0.6);
+      animation: ring-ripple 2s ease-in-out infinite;
+    }
+
+    @keyframes ring-ripple {
+      0%   { inset: -3px; opacity: 0.8; }
+      100% { inset: -14px; opacity: 0; }
+    }
+
+    .play-btn:hover {
+      animation: none;
+      transform: translateY(-3px) scale(1.04);
+      box-shadow:
+        0 0 45px rgba(0,255,231,0.9),
+        0 0 90px rgba(0,255,231,0.5),
+        0 0 140px rgba(0,136,255,0.35);
+    }
+    .play-btn:active { transform: scale(0.98); }
+
+    /* Bouncing play arrow */
+    .play-icon {
+      width: 0; height: 0;
+      border-left: 16px solid #050810;
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      animation: icon-bounce 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    @keyframes icon-bounce {
+      0%, 100% { transform: translateX(0); }
+      50%       { transform: translateX(4px); }
+    }
+
+    /* ── GAME CARD (right side) ── */
+    .game-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .game-preview {
+      width: 100%; height: 220px;
+      background:
+        radial-gradient(ellipse at 30% 60%, rgba(0,255,231,0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(255,46,76,0.08) 0%, transparent 50%),
+        linear-gradient(180deg, #0b1829 0%, #050810 100%);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Animated grid floor */
+    .game-preview::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,255,231,0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,255,231,0.06) 1px, transparent 1px);
+      background-size: 30px 30px;
+      transform: perspective(200px) rotateX(40deg) translateY(30%);
+      transform-origin: bottom;
+    }
+
+    .game-preview-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 0 0 30px var(--neon), 0 0 60px rgba(0,255,231,0.4);
+      z-index: 1;
+      letter-spacing: 0.08em;
+      animation: pulse-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { text-shadow: 0 0 20px var(--neon), 0 0 40px rgba(0,255,231,0.3); }
+      50%       { text-shadow: 0 0 40px var(--neon), 0 0 80px rgba(0,255,231,0.6); }
+    }
+
+    .card-info { padding: 20px; }
+
+    .rating-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stars-display { color: var(--gold); font-size: 0.9rem; letter-spacing: 2px; }
+    .rating-num { font-size: 0.85rem; color: #6b7a9a; }
+
+    .difficulty {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .diff-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: #4a5a78; }
+    .diff-bars { display: flex; gap: 3px; }
+    .diff-bar {
+      width: 18px; height: 6px; border-radius: 2px;
+      background: var(--border);
+    }
+    .diff-bar.active { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+    .card-desc { font-size: 0.85rem; color: #6b7a9a; line-height: 1.6; margin-bottom: 16px; }
+
+    .level-list { display: flex; flex-direction: column; gap: 6px; }
+    .level-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      font-size: 0.8rem;
+    }
+
+    .level-name { display: flex; align-items: center; gap: 8px; }
+    .level-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 6px var(--neon);
+    }
+    .level-dot.locked { background: #2a3a55; box-shadow: none; }
+
+    .level-badge {
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 2px;
+    }
+    .level-badge.available { background: rgba(0,255,231,0.1); color: var(--neon); border: 1px solid rgba(0,255,231,0.3); }
+    .level-badge.locked-badge { background: rgba(255,255,255,0.04); color: #4a5a78; border: 1px solid var(--border); }
+
+    /* ── BOTTOM BAR ── */
+    .bottom-section {
+      position: relative; z-index: 5;
+      max-width: 1100px;
+      margin: 60px auto;
+      padding: 0 32px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
 
-    .spinner {
-      width: 52px; height: 52px;
-      border: 5px solid #222;
-      border-top-color: #a855f7;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .feature-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 22px;
     }
 
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    #loader p {
-      color: #888;
-      font-size: 0.9rem;
-      letter-spacing: 0.08em;
+    .feature-icon { font-size: 1.8rem; margin-bottom: 12px; }
+    .feature-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #cdd6f4;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
     }
+    .feature-desc { font-size: 0.82rem; color: #4a5a78; line-height: 1.6; }
 
-    /* Main content */
-    #content {
-      position: relative; z-index: 1;
-      text-align: center;
+    /* ── PRANK OVERLAY ── */
+    #prank-overlay {
       display: none;
+      position: fixed; inset: 0;
+      background: #000;
+      z-index: 9999;
       flex-direction: column;
       align-items: center;
-      gap: 18px;
-      padding: 40px 30px;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+      text-align: center;
     }
 
-    .emoji {
-      font-size: 5rem;
-      animation: bounce 1s ease infinite alternate;
-    }
+    #prank-overlay.show { display: flex; }
 
+    .prank-emoji { font-size: 6rem; animation: bounce 0.6s ease infinite alternate; }
     @keyframes bounce {
-      from { transform: translateY(0); }
-      to   { transform: translateY(-18px); }
+      from { transform: translateY(0) rotate(-5deg); }
+      to   { transform: translateY(-20px) rotate(5deg); }
     }
 
-    h1 {
-      font-family: 'Fredoka One', cursive;
-      font-size: clamp(2rem, 8vw, 4rem);
+    .prank-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2rem, 8vw, 4.5rem);
+      font-weight: 900;
       color: #fff;
-      text-shadow: 0 0 30px #a855f7, 0 0 60px #7c3aed;
-      letter-spacing: 0.02em;
+      text-align: center;
+      animation: color-cycle 0.4s linear infinite;
     }
 
-    p.sub {
-      color: #aaa;
-      font-size: 1rem;
-      max-width: 320px;
-      line-height: 1.6;
+    @keyframes color-cycle {
+      0%   { color: #ff2e4c; text-shadow: 0 0 40px #ff2e4c; }
+      33%  { color: #00ffe7; text-shadow: 0 0 40px #00ffe7; }
+      66%  { color: #ffd700; text-shadow: 0 0 40px #ffd700; }
+      100% { color: #ff2e4c; text-shadow: 0 0 40px #ff2e4c; }
     }
 
-    /* Volume bar animation */
-    .bars {
-      display: flex;
-      align-items: flex-end;
-      gap: 5px;
-      height: 50px;
-      margin-top: 10px;
+    .prank-sub {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: clamp(1rem, 3vw, 1.2rem);
+      color: #8899bb;
+      letter-spacing: 0.1em;
+      text-align: center;
     }
 
-    .bar {
-      width: 10px;
-      border-radius: 4px 4px 0 0;
-      background: linear-gradient(to top, #7c3aed, #ec4899);
-      animation: bar-bounce 0.5s ease infinite alternate;
+    .sound-bars {
+      display: flex; align-items: flex-end; gap: 5px; height: 50px; margin-top: 10px;
+    }
+    .sbar {
+      width: 12px; border-radius: 3px 3px 0 0;
+      background: linear-gradient(to top, #ff2e4c, #ffd700);
+      animation: sbar-bounce 0.3s ease infinite alternate;
+    }
+    .sbar:nth-child(1){ animation-delay:0.0s; }
+    .sbar:nth-child(2){ animation-delay:0.05s; }
+    .sbar:nth-child(3){ animation-delay:0.1s; }
+    .sbar:nth-child(4){ animation-delay:0.15s; }
+    .sbar:nth-child(5){ animation-delay:0.1s; }
+    .sbar:nth-child(6){ animation-delay:0.05s; }
+    .sbar:nth-child(7){ animation-delay:0.0s; }
+    @keyframes sbar-bounce {
+      from { height: 5px; }
+      to   { height: 46px; }
     }
 
-    .bar:nth-child(1) { animation-delay: 0.0s; }
-    .bar:nth-child(2) { animation-delay: 0.1s; }
-    .bar:nth-child(3) { animation-delay: 0.2s; }
-    .bar:nth-child(4) { animation-delay: 0.3s; }
-    .bar:nth-child(5) { animation-delay: 0.4s; }
-    .bar:nth-child(6) { animation-delay: 0.2s; }
-    .bar:nth-child(7) { animation-delay: 0.1s; }
-
-    @keyframes bar-bounce {
-      from { height: 8px; }
-      to   { height: 45px; }
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+        margin-top: 40px;
+      }
+      .game-card { display: none; }
+      .bottom-section { grid-template-columns: 1fr 1fr; }
     }
 
-    /* Glitch text */
-    .glitch {
-      color: #ec4899;
-      font-family: 'Fredoka One', cursive;
-      font-size: 1.1rem;
-      letter-spacing: 0.15em;
-      animation: glitch 2s infinite;
+    @media (max-width: 600px) {
+      header { padding: 12px 16px; gap: 10px; }
+      nav { display: none; }
+      .hero { padding: 0 16px; margin-top: 28px; gap: 24px; }
+      .hero-text h1 { font-size: clamp(2rem, 10vw, 2.8rem); }
+      .subtitle { font-size: 0.8rem; }
+      .desc { font-size: 0.95rem; }
+      .stats { gap: 18px; }
+      .stat-value { font-size: 1.1rem; }
+      .play-btn {
+        padding: 16px 28px;
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        width: 100%;
+        justify-content: center;
+      }
+      .bottom-section {
+        grid-template-columns: 1fr;
+        margin: 36px auto;
+        padding: 0 16px;
+      }
+      .tags { gap: 6px; }
+      .tag { font-size: 0.7rem; }
     }
 
-    @keyframes glitch {
-      0%, 90%, 100% { transform: none; opacity: 1; }
-      92% { transform: translateX(-3px); opacity: 0.8; }
-      94% { transform: translateX(3px); opacity: 0.9; }
-      96% { transform: translateX(-2px); opacity: 0.7; }
-    }
-
-    /* Particles */
-    .particles {
-      position: fixed; inset: 0; pointer-events: none; z-index: 0;
-    }
-    .particle {
-      position: absolute;
-      width: 4px; height: 4px;
-      border-radius: 50%;
-      background: #a855f7;
-      opacity: 0;
-      animation: float-up 4s ease-in infinite;
-    }
-
-    @keyframes float-up {
-      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
-      20%  { opacity: 0.7; }
-      100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+    @media (max-width: 380px) {
+      .play-btn { padding: 14px 20px; font-size: 0.78rem; }
+      .stat-value { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
 
-<div class="bg"></div>
+<div class="stars"></div>
 
-<!-- Fake loader to trick the user into waiting (interaction bypass) -->
-<div id="loader">
-  <div class="spinner"></div>
-  <p>Loading important message...</p>
-</div>
-
-<!-- Main prank content -->
-<div id="content">
-  <div class="emoji">🔊</div>
-  <h1>FUCK YOU NIGGA! 😂</h1>
-  <div class="bars">
-    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-    <div class="bar"></div>
+<!-- HEADER -->
+<header>
+  <div class="logo">SHADOW<span>REALM</span></div>
+  <nav>
+    <a href="#">Games</a>
+    <a href="#">Leaderboard</a>
+    <a href="#">Community</a>
+    <a href="#">Store</a>
+  </nav>
+  <div class="nav-right">
+    <button class="btn-small">Log In</button>
+    <button class="btn-small" style="border-color:#00ffe7;color:#00ffe7;">Sign Up</button>
   </div>
-  <p class="sub">. Hope your speakers survived! 🎶💀</p>
-  <p class="glitch">MAXIMUM VOLUME ACTIVATED</p>
-</div>
+</header>
 
-<!-- Floating particles -->
-<div class="particles" id="particles"></div>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <p class="subtitle">⚔ &nbsp;Featured Game &nbsp;·&nbsp; Action RPG</p>
+    <h1>SHADOW<br/><em>REALM</em></h1>
+
+    <div class="tags">
+      <span class="tag new">New</span>
+      <span class="tag hot">Trending</span>
+      <span class="tag">Free to Play</span>
+      <span class="tag">Browser</span>
+    </div>
+
+    <p class="desc">
+      Enter a dying world consumed by darkness. Fight through 50 hand-crafted levels,
+      unlock ancient powers, and face the Shadow King in an epic final battle.
+      No download required — play instantly in your browser.
+    </p>
+
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-value">2.4M</span>
+        <span class="stat-label">Players</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">50</span>
+        <span class="stat-label">Levels</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">4.8★</span>
+        <span class="stat-label">Rating</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">FREE</span>
+        <span class="stat-label">To Play</span>
+      </div>
+    </div>
+
+    <!-- THE TRAP BUTTON -->
+    <button class="play-btn" id="playBtn">
+      <div class="play-icon"></div>
+      PRESS TO PLAY
+    </button>
+  </div>
+
+  <!-- GAME CARD -->
+  <div class="game-card">
+    <div class="game-preview">
+      <span class="game-preview-title">SHADOW REALM</span>
+    </div>
+    <div class="card-info">
+      <div class="rating-row">
+        <span class="stars-display">★★★★★</span>
+        <span class="rating-num">4.8 / 5.0 &nbsp;·&nbsp; 18,432 reviews</span>
+      </div>
+      <div class="difficulty">
+        <span class="diff-label">Difficulty</span>
+        <div class="diff-bars">
+          <div class="diff-bar active"></div>
+          <div class="diff-bar active"></div>
+          <div class="diff-bar active"></div>
+          <div class="diff-bar"></div>
+          <div class="diff-bar"></div>
+        </div>
+      </div>
+      <p class="card-desc">Survive the shadow realm across 50 increasingly brutal levels. Your first run will not be your last.</p>
+      <div class="level-list">
+        <div class="level-item">
+          <div class="level-name"><div class="level-dot"></div> Level 1 — The Awakening</div>
+          <span class="level-badge available">Available</span>
+        </div>
+        <div class="level-item">
+          <div class="level-name"><div class="level-dot locked"></div> Level 2 — Dark Forest</div>
+          <span class="level-badge locked-badge">🔒 Locked</span>
+        </div>
+        <div class="level-item">
+          <div class="level-name"><div class="level-dot locked"></div> Level 3 — The Abyss</div>
+          <span class="level-badge locked-badge">🔒 Locked</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOTTOM FEATURES -->
+<section class="bottom-section">
+  <div class="feature-card">
+    <div class="feature-icon">⚡</div>
+    <div class="feature-title">Instant Play</div>
+    <div class="feature-desc">No downloads, no installs. The full game runs directly in your browser at 60fps.</div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🏆</div>
+    <div class="feature-title">Global Leaderboard</div>
+    <div class="feature-desc">Compete against 2.4 million players worldwide. Climb the ranks and claim your spot at the top.</div>
+  </div>
+  <div class="feature-card">
+    <div class="feature-icon">🎮</div>
+    <div class="feature-title">50 Unique Levels</div>
+    <div class="feature-desc">Hand-crafted dungeons, boss fights, and hidden secrets await across every level.</div>
+  </div>
+</section>
+
+<!-- PRANK REVEAL OVERLAY -->
+<div id="prank-overlay">
+  <div class="prank-title">Haa!</div>
+  <div class="sound-bars">
+    <div class="sbar"></div><div class="sbar"></div><div class="sbar"></div>
+    <div class="sbar"></div><div class="sbar"></div><div class="sbar"></div>
+    <div class="sbar"></div>
+  </div>
+  <p class="prank-sub">There is no game. &nbsp;You RETARD</p>
+</div>
 
 <script>
-  // ── CUSTOMIZE YOUR SOUND HERE ──────────────────────────────────────────────
-  // Replace this URL with any direct .mp3 / .ogg link, or a base64 data URI.
-  // Free loud prank sounds:
-  //   • Airhorn: https://www.myinstants.com/media/sounds/air-horn-club-sample.mp3
-  //   • Screaming goat: https://www.myinstants.com/media/sounds/goat.mp3
-  //   • Windows XP error: freely available on archive.org
-  //
-  // To use a local file, convert it to base64 and replace the src below.
-  const SOUND_URL = "music.mp3";
-  // ──────────────────────────────────────────────────────────────────────────
+  // ── PUT YOUR SOUND FILE NAME HERE ─────────────────────
+  const SOUND_FILE = "music.mp3";
+  // ──────────────────────────────────────────────────────
 
-  const audio = new Audio(SOUND_URL);
-  audio.loop = false;
-
-  // Autoplay bypass: start muted (allowed by browsers), then instantly unmute
-  audio.muted = true;
+  const audio = new Audio(SOUND_FILE);
   audio.volume = 1.0;
+  audio.loop = true;
 
-  // After a short "loading" fake screen, play the sound
-  setTimeout(() => {
-    audio.play().then(() => {
-      audio.muted = false; // UNMUTE → full blast
-    }).catch(() => {
-      // If still blocked, wait for ANY user interaction
-      const unlock = () => {
-        audio.muted = false;
-        audio.play();
-        document.removeEventListener('click', unlock);
-        document.removeEventListener('touchstart', unlock);
-      };
-      document.addEventListener('click', unlock);
-      document.addEventListener('touchstart', unlock);
-    });
+  document.getElementById('playBtn').addEventListener('click', () => {
+    audio.play();
+    document.getElementById('prank-overlay').classList.add('show');
 
-    // Show the reveal screen
-    document.getElementById('loader').style.display = 'none';
-    const c = document.getElementById('content');
-    c.style.display = 'flex';
-
-    // Spawn particles
-    const container = document.getElementById('particles');
-    for (let i = 0; i < 40; i++) {
-      const p = document.createElement('div');
-      p.className = 'particle';
-      p.style.left = Math.random() * 100 + 'vw';
-      p.style.animationDelay = (Math.random() * 4) + 's';
-      p.style.animationDuration = (3 + Math.random() * 3) + 's';
-      p.style.background = ['#a855f7','#ec4899','#f97316','#facc15'][Math.floor(Math.random()*4)];
-      container.appendChild(p);
-    }
-  }, 2500); // fake loading for 2.5 seconds
+    let colors = ['#ff002a','#00ffe7','#ffd700','#ff6600','#cc00ff'];
+    let i = 0;
+    setInterval(() => {
+      document.getElementById('prank-overlay').style.background = colors[i % colors.length];
+      i++;
+    }, 150);
+  });
 </script>
 </body>
 </html>
